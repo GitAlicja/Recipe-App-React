@@ -3,10 +3,12 @@
  */
 const mongoose = require('mongoose');
 
-exports.connectDb = () => {
+module.exports.connect = () => {
     return mongoose.connect(process.env.DATABASE_URL, {useNewUrlParser: true, useUnifiedTopology: true});
 };
 
-exports.closeDb = () => {
+module.exports.close = () => {
     return mongoose.connection.close();
 };
+
+module.exports.getConnection = () => mongoose.connection;

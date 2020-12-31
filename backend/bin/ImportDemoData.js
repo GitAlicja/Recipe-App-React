@@ -2,8 +2,7 @@
  * Import demo data to MongoDB and exit.
  */
 const dotenv = require('dotenv');
-const {connectDb, closeDb} = require('../db/connection');
-const RecipeSchema = require('../db/schema/RecipeSchema');
+const {DbConnection, RecipeModel} = require('../db');
 
 const recipe = {
     title: 'MISO MUSHROOMS WITH CHICKPEAS AND KALE',
@@ -30,8 +29,8 @@ const recipe = {
 
 (async () => {
     dotenv.config();
-    await connectDb();
-    await RecipeSchema.create(recipe);
+    await DbConnection.connect();
+    await RecipeModel.create(recipe);
     console.log("Recipe created!");
-    await closeDb();
+    await DbConnection.close();
 })();
