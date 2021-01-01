@@ -17,32 +17,7 @@ class UserController {
         this.session = session;
     }
 
-    /**
-     * Create and save a new user to DB. User is logged in afterwards.
-     *
-     * @param name user name
-     * @param email user email
-     * @param password user password (plaintext)
-     * @returns {Promise<UserModel>} created user
-     * @throws RegistrationError if precondition fails
-     */
-    async register(name, email, password) {
 
-        if (await UserModel.findOne({email})) {
-            throw new RegistrationError(`User with email '${email}' already exists`,
-                RegistrationError.prototype.DUPLICATE_EMAIL);
-        }
-        if (await UserModel.findOne({name})) {
-            throw new RegistrationError(`User with email '${name}' already exists`,
-                RegistrationError.prototype.DUPLICATE_NAME);
-        }
-
-        const passwordHash = await bcrypt.hash(password, saltIterations);
-        const newUser = {email, name, passwordHash};
-        const user = await UserModel.create(newUser);
-        this.session.userId = user._id;
-        return user;
-    }
 
     /**
      * Validate user credentials and login a user.
@@ -52,7 +27,7 @@ class UserController {
      * @returns {Promise<UserModel|undefined>} logged in user if success, undefined if login failed.
      */
     async login(email, password) {
-        const user = await UserModel.findOne({email});
+        const user = await UserModel.findOne({email}).exec();
         if (!user || !await bcrypt.compare(password, user.passwordHash)) {
             this.session.destroy();
             return undefined;
@@ -127,21 +102,6 @@ class UserController {
         return true;
     }
 }
-
-/**
- * Thrown in registration process.
- */
-class RegistrationError extends Error {
-
-    constructor(message, cause) {
-
-        super(message);
-        this.cause = cause;
-    }
-}
-
-RegistrationError.prototype.DUPLICATE_EMAIL = 'duplicateEmail';
-RegistrationError.prototype.DUPLICATE_NAME = 'duplicateName';
 
 /**
  * Thrown during user update.

@@ -3,7 +3,7 @@
  */
 const mongoose = require('mongoose');
 
-const recipeModel = new mongoose.Schema({
+const recipeSchema = new mongoose.Schema({
 
     title: {type: String, required: true, unique: true},
     subtitle: {type: String, required: false},
@@ -29,4 +29,4 @@ const recipeModel = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model('Recipe', recipeModel);
+module.exports = mongoose.model('Recipe', recipeSchema);
