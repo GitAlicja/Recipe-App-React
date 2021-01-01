@@ -117,4 +117,4 @@ class UpdateError extends Error {
 UpdateError.prototype.NOT_LOGGED_IN = 'not_logged_in';
 
 
-module.exports = {UserController, RegistrationError, UpdateError};
+module.exports = {UserController, UpdateError};
