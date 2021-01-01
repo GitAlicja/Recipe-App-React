@@ -1,0 +1,22 @@
+.recipe-main-container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 0 auto;
+    max-width: 750px;
+    box-sizing: border-box;
+    padding: 40px 70px;
+    flex-grow: 1;
+    background-color: white;
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 30px;
+}
+
+h4 {
+    color: #39603d;
+}

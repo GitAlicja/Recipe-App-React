@@ -1,5 +1,8 @@
 import React from 'react';
 
+import './RecipeDetails.css'
+
+
 class RecipeDetails extends React.Component {
 
     render() {
@@ -19,7 +22,7 @@ class RecipeDetails extends React.Component {
                 </div>
 
                 <div className="recipe-image-container">
-                    {recipe.imageUrl ? (<img src={recipe.imageUrl} alt={recipe.title}></img>) : (<img src='../../public/standard-imgages/nadine-primeau--bLkT8wGV0I-unsplash.jpg' alt='Products you could use to cook a healthy dish'></img>)}
+                    {recipe.imageUrl ? (<img src={recipe.imageUrl} alt={recipe.title} className="img-fluid"></img>) : (<img src='../../public/standard-imgages/nadine-primeau--bLkT8wGV0I-unsplash.jpg' alt='Products you could use to cook a healthy dish' className="img-fluid"></img>)}
                     {recipe.description ? (<p>{recipe.description}</p>) : undefined}
                 </div>
 
