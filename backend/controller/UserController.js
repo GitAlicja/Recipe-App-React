@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const {UserModel} = require('../db');
+const UserModel = require('../db/model/UserModel');
 
 const saltIterations = 10;
 
@@ -93,7 +93,7 @@ class UserController {
     async updateUser(changes) {
         const user = await this.getLoggedInUser();
         if (!user) {
-            return throw new UpdateError('Not logged-in!', UpdateError.prototype.NOT_LOGGED_IN);
+            throw new UpdateError('Not logged-in!', UpdateError.prototype.NOT_LOGGED_IN);
         }
         if (changes.avatarUrl !== undefined) {
             user.avatarUrl = changes.avatarUrl;
@@ -101,7 +101,30 @@ class UserController {
         if (changes.name) {
             user.name = changes.name;
         }
+        user.lastModified = new Date();
         return await user.save();
+    }
+
+    /**
+     * Set a new password for the current user.
+     *
+     * @param oldPassword old password for confirmation
+     * @param newPassword new password to set
+     * @returns {Promise<boolean>} true if success, false if old password mismatch
+     * @throws UpdateError if user not logged in
+     */
+    async updatePassword(oldPassword, newPassword) {
+        const user = await this.getLoggedInUser();
+        if (!user) {
+            throw new UpdateError('Not logged-in!', UpdateError.prototype.NOT_LOGGED_IN);
+        }
+        if (!await bcrypt.compare(oldPassword, user.passwordHash)) {
+            return false;
+        }
+        user.passwordHash = bcrypt.hash(newPassword, saltIterations);
+        user.lastModified = new Date();
+        await user.save();
+        return true;
     }
 }
 
