@@ -21,12 +21,17 @@ router.post('/login', (req, res) => {
     new UserController(req.session)
         .login(email, password)
         .then(user => {
-            res.status(user ? 200 : 401).send(user);
-            console.info(`User login success for '${email}'`);
+            if (user) {
+                res.send(userForApiOutput(user));
+                console.info(`User login success for '${email}'`);
+            } else {
+                res.sendStatus(401);
+                console.info(`User login failed for '${email}', unauthorized`);
+            }
         })
         .catch(error => {
             console.error(`User login failed for '${email}'`, error);
-            res.status(500).send({error: 'Internal server error'})
+            res.sendStatus(500);
         });
 });
 
@@ -39,19 +44,19 @@ router.post('/logout', (req, res) => {
     new UserController(req.session)
         .logout()
         .then(() => {
-            res.status(204).send();
+            res.sendStatus(204);
             console.info(`User logout success for '${userId}'`);
         })
         .catch(error => {
             console.error(`User logout failed for '${userId}'`, error);
-            res.status(500).send({error: 'Internal server error'})
+            res.sendStatus(500);
         });
 });
 
 /**
  * Get own user details.
  */
-router.get('/me', (req, res) => {
+router.get('/', (req, res) => {
     const userId = (req.session && req.session.userId) || '(unknown)';
     new UserController(req.session)
         .getLoggedInUser()
@@ -59,41 +64,74 @@ router.get('/me', (req, res) => {
             if (!user) {
                 throw new Error(`User get self '${userId}' not found`);
             }
-            res.send(user);
+            res.send(userForApiOutput(user));
             console.info(`User get self success for '${user._id}'`)
         })
         .catch(error => {
             console.error(`User get self failed for '${userId}'`, error);
-            res.status(500).send({error: 'Internal server error'})
+            res.sendStatus(500);
         });
 });
 
 /**
  * Update own user properties.
  */
-router.patch('/me', (req, res) => {
+router.patch('/', (req, res) => {
 
+    const userId = (req.session && req.session.userId) || '(unknown)';
     const name = getNonEmptyString('name', req.body) || (req.body.hasOwnProperty('name') ? null : undefined);
     const avatarUrl = getNonEmptyString('avatarUrl', req.body) || (req.body.hasOwnProperty('avatarUrl') ? null : undefined);
 
     if (name === null) {
         res.status(400).send({reason: 'Invalid parameters', invalidParams: ['name']});
+        console.info(`User update self failed for '${user._id}', invalid param name`);
         return;
     }
 
-    const userId = (req.session && req.session.userId) || '(unknown)';
     new UserController(req.session)
         .updateUser({name, avatarUrl})
         .then(user => {
             if (!user) {
                 throw new Error(`User update self '${userId}' not found`);
             }
-            res.send(user);
+            res.send(userForApiOutput(user));
             console.info(`User update self success for '${user._id}'`)
         })
         .catch(error => {
             console.error(`User update self failed for '${userId}'`, error);
-            res.status(500).send({error: 'Internal server error'})
+            res.sendStatus(500);
+        });
+});
+
+/**
+ * Set new password.
+ */
+router.post('/updatePassword', (req, res) => {
+
+    const userId = (req.session && req.session.userId) || '(unknown)';
+    const oldPassword = getNonEmptyString('oldPassword', req.body);
+    const newPassword = getNonEmptyString('newPassword', req.body);
+    if (!oldPassword || !newPassword) {
+        const invalidParams = [];
+        !newPassword && invalidParams.push('newPassword');
+        !oldPassword && invalidParams.push('oldPassword');
+        res.status(400).send({reason: 'Invalid parameters', invalidParams});
+        console.info(`User update password failed for '${userId}'. Invalid params:`, invalidParams);
+        return;
+    }
+
+    new UserController(req.session)
+        .updatePassword(oldPassword, newPassword)
+        .then(user => {
+            if (!user) {
+                throw new Error(`User update password '${userId}' not found`);
+            }
+            res.sendStatus(204);
+            console.info(`User update password success for '${user._id}'`)
+        })
+        .catch(error => {
+            console.error(`User update password failed for '${userId}'`, error);
+            res.sendStatus(500);
         });
 });
 
@@ -110,3 +148,13 @@ const getNonEmptyString = (key, body) => {
     }
     return body[key].trim();
 }
+
+/**
+ * Convert UserModel to API output by removing sensitive data.
+ *
+ * @param userModel DB model
+ * @returns JSON for API output
+ */
+const userForApiOutput = userModel => ({...userModel, passwordHash: undefined});
+
+module.exports = router;

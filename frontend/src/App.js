@@ -7,7 +7,7 @@ function App() {
   const [recipes, setRecipes] = useState(undefined);
 
   if (!recipes) {
-    fetch('http://localhost:3100/')
+    fetch('http://localhost:3100/recipe')
       .then(response => response.json())
       .then(setRecipes);
   }

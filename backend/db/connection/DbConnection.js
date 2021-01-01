@@ -4,7 +4,11 @@
 const mongoose = require('mongoose');
 
 module.exports.connect = () => {
-    return mongoose.connect(process.env.DATABASE_URL, {useNewUrlParser: true, useUnifiedTopology: true});
+    return mongoose.connect(process.env.DATABASE_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true
+    });
 };
 
 module.exports.close = () => {

@@ -2,7 +2,8 @@
  * Import demo data to MongoDB and exit.
  */
 const dotenv = require('dotenv');
-const {DbConnection, RecipeModel} = require('../db');
+const DbConnection = require('../db/connection/DbConnection');
+const RecipeModel = require('../db/model/RecipeModel');
 
 const recipe = {
     title: 'MISO MUSHROOMS WITH CHICKPEAS AND KALE',
