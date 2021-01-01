@@ -1,6 +1,7 @@
 const {v4: UUIDv4} = require('uuid');
 const UserModel = require('../db/model/UserModel');
 const UserInvitationModel = require('../db/model/UserInvitationModel');
+const InvitationMail = require('../mail/InvitationMail');
 
 class InvitationController {
 
@@ -16,8 +17,9 @@ class InvitationController {
             return CreationErrors.invitationExists;
         }
         const newInvitation = await UserInvitationModel.create({email, registrationKey: UUIDv4()});
-        // TODO send email
-        const emailSuccess = true;
+        const confirmUrl = process.env.FRONTEND_URL + '/invite/confirm?email=' + encodeURIComponent(newInvitation.email)
+            + '&registrationKey=' + encodeURIComponent(newInvitation.registrationKey);
+        const emailSuccess = new InvitationMail(email, confirmUrl).send()
         if (!emailSuccess) {
             await newInvitation.remove();
             return CreationErrors.sendEmailFailed;
